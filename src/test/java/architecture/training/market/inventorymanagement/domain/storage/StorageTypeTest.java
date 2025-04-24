@@ -1,4 +1,4 @@
-package architecture.training.market.inventorymanagement.domain;
+package architecture.training.market.inventorymanagement.domain.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -11,6 +11,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
+
 @ExtendWith(MockitoExtension.class)
 public class StorageTypeTest {
 
@@ -20,7 +22,7 @@ public class StorageTypeTest {
     @Test
     public void testConstructorWithNullName() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            new StorageType(null, "Description", domainEventPublisher);
+            StorageType.create(null, "Description", domainEventPublisher);
         });
         assertEquals("Name cannot be null or empty", exception.getMessage());
     }
@@ -28,7 +30,7 @@ public class StorageTypeTest {
     @Test
     public void testConstructorWithEmptyName() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            new StorageType("", "Description", domainEventPublisher);
+            StorageType.create("", "Description", domainEventPublisher);
         });
         assertEquals("Name cannot be null or empty", exception.getMessage());
     }
@@ -36,7 +38,7 @@ public class StorageTypeTest {
     @Test
     public void testConstructorWithNullDescription() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            new StorageType("Name", null, domainEventPublisher);
+            StorageType.create("Name", null, domainEventPublisher);
         });
         assertEquals("Description cannot be null or empty", exception.getMessage());
     }
@@ -44,14 +46,14 @@ public class StorageTypeTest {
     @Test
     public void testConstructorWithEmptyDescription() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            new StorageType("Name", "", domainEventPublisher);
+            StorageType.create("Name", "", domainEventPublisher);
         });
         assertEquals("Description cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testConstructorHappyPath() {
-        StorageType storageType = new StorageType("Name", "Description", domainEventPublisher);
+        StorageType storageType = StorageType.create("Name", "Description", domainEventPublisher);
         assertEquals(true, storageType.getUuid() != null && !storageType.getUuid().toString().isEmpty());
         ArgumentCaptor<StorageTypeCreatedEvent> captor = ArgumentCaptor.forClass(StorageTypeCreatedEvent.class);
         verify(domainEventPublisher, times(1)).publishEvent(captor.capture());

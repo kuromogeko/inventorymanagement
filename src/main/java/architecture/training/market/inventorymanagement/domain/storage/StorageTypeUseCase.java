@@ -1,4 +1,4 @@
-package architecture.training.market.inventorymanagement.domain;
+package architecture.training.market.inventorymanagement.domain.storage;
 
 import java.util.List;
 import java.util.UUID;
