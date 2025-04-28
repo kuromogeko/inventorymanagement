@@ -20,4 +20,26 @@ public record ItemAmount(int capacity)  {
         }
         return new ItemAmount(this.capacity - other.capacity);
     }
+
+    /**
+     * Subtraction for use in contexts where the result can not go below 0, does not throw an exception
+     * In case of wrong usage (e.g. 7 - 12) will return 0;
+     * @param other /
+     * @return Subtraction result of this - other
+     */
+    public ItemAmount subtractSafe(ItemAmount other){
+        if (this.capacity - other.capacity < 0) {
+            return new ItemAmount(0);
+        }
+        return new ItemAmount(this.capacity - other.capacity);
+    }
+
+    public boolean greaterOrEquals(ItemAmount other){
+        return this.capacity >= other.capacity;
+    }
+
+
+    public boolean greaterThan(ItemAmount other) {
+        return this.capacity > other.capacity;
+    }
 }

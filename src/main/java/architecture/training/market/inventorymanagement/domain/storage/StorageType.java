@@ -10,7 +10,8 @@ public class StorageType {
     private String name;
     private String description;
 
-    private StorageType(){}
+    private StorageType() {
+    }
 
     public static StorageType create(String name, String description, DomainEventPublisher eventPublisher) {
         var event = new StorageTypeCreatedEvent(UUID.randomUUID(), name, description);
@@ -43,5 +44,26 @@ public class StorageType {
 
     public String getDescription() {
         return description;
+    }
+
+    public void update(StorageTypeUpdateRequest request, DomainEventPublisher publisher) {
+        this.name = request.name();
+        this.description = request.description();
+        publisher.publishEvent(new StorageTypeUpdatedEvent(this.uuid, this.description, this.name));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof StorageType))
+            return false;
+        StorageType that = (StorageType) o;
+        return uuid.equals(that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return uuid.hashCode();
     }
 }
