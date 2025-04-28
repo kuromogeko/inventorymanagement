@@ -46,12 +46,12 @@ public class InventoryItem {
         return this.bestBefore;
     }
 
-    public void handleInventoryItemStoredEvent(InventoryItemStoredEvent event) {
+    public void applyInventoryItemStoredEvent(InventoryItemStoredEvent event) {
         this.bestBefore = this.bestBefore.older(event.bestBefore());
         this.amount = this.amount.add(event.amount());
     }
 
-    public void notifyUnexplainedStockDecrease(ItemAmount difference, DomainEventPublisher publisher) {
+    public void unexplainedStockDecrease(ItemAmount difference, DomainEventPublisher publisher) {
         try {
             this.amount = this.amount.subtract(difference);
             publisher.publishEvent(new InventoryItemDecreasedEvent(this.storageItemId, difference));
@@ -61,7 +61,7 @@ public class InventoryItem {
         }
     }
 
-    public void notifySoonerBestBeforeFound(BestBefore soonestBestBefore, DomainEventPublisher publisher) {
+    public void soonerBestBeforeFound(BestBefore soonestBestBefore, DomainEventPublisher publisher) {
         publisher.publishEvent(new InventoryItemBestBeforeChanged(this.storageItemId, soonestBestBefore));
     }
 }

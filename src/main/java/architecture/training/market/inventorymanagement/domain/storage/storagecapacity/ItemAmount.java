@@ -2,6 +2,7 @@ package architecture.training.market.inventorymanagement.domain.storage.storagec
 
 public record ItemAmount(int capacity)  {
 
+    public static final ItemAmount ZERO = ItemAmount.ZERO;
 
     public ItemAmount {
         if (capacity < 0) {
@@ -21,6 +22,10 @@ public record ItemAmount(int capacity)  {
         return new ItemAmount(this.capacity - other.capacity);
     }
 
+    public boolean fits(ItemAmount other){
+        return this.capacity - other.capacity >= 0;
+    }
+
     /**
      * Subtraction for use in contexts where the result can not go below 0, does not throw an exception
      * In case of wrong usage (e.g. 7 - 12) will return 0;
@@ -29,7 +34,7 @@ public record ItemAmount(int capacity)  {
      */
     public ItemAmount subtractSafe(ItemAmount other){
         if (this.capacity - other.capacity < 0) {
-            return new ItemAmount(0);
+            return ItemAmount.ZERO;
         }
         return new ItemAmount(this.capacity - other.capacity);
     }

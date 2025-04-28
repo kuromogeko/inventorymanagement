@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
 import architecture.training.market.inventorymanagement.domain.StorageTypeService;
 import architecture.training.market.inventorymanagement.domain.storage.StorageType;
-import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemStoredEvent;
+import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemDecreasedEvent;
 
 public class StorageCapacityService {
     private final StorageTypeService typeService;
@@ -57,7 +57,7 @@ public class StorageCapacityService {
                 .filter(capacity -> storageTypes.stream()
                         .anyMatch(wants -> wants.getUuid().equals(capacity.getStorageTypeId())))
                 .collect(Collectors.toList());
-        var reservedStorage = new ItemAmount(0);
+        var reservedStorage = ItemAmount.ZERO;
         List<StorageCapacity> neededStorage = new ArrayList<>();
         for (StorageCapacity storageCapacity : allsCapacitiesWithMatchingType) {
             if (reservedStorage.greaterOrEquals(amount)) {
@@ -66,10 +66,33 @@ public class StorageCapacityService {
             reservedStorage = reservedStorage.add(storageCapacity.getRemainingCapacity());
             neededStorage.add(storageCapacity);
         }
-        if(!reservedStorage.greaterOrEquals(amount)){
+        if (!reservedStorage.greaterOrEquals(amount)) {
             throw new NotEnoughCapacityAvailableException();
         }
         return Collections.unmodifiableList(neededStorage);
+    }
+
+    public void unloadCapacity(InventoryItemDecreasedEvent event) {
+        List<StorageCapacity> capacitiesWithItem = repository.findAll().stream()
+                .filter(capacity -> capacity.hasItem(event.storageItemId())).collect(Collectors.toList());
+        var remainingUnloadAmount = event.decreasedBy();
+        for (StorageCapacity currentCapacity : capacitiesWithItem) {
+            var item = currentCapacity.getItem(event.storageItemId());
+            if (item.isEmpty()) {
+                continue;
+            }
+            var currentUnloadAmount = item.get().amount().greaterOrEquals(remainingUnloadAmount) ? remainingUnloadAmount
+                    : item.get().amount();
+            try {
+                currentCapacity.unload(event.storageItemId(), currentUnloadAmount, publisher);
+            } catch (ItemNotInStoreException | UnloadGreaterThanStoredAmoundException e) {
+                // TODO Log the programmers failed us
+            }
+            remainingUnloadAmount = remainingUnloadAmount.subtractSafe(item.get().amount());
+        }
+        if (remainingUnloadAmount.greaterOrEquals(ItemAmount.ZERO)) {
+            // TODO LOG this is sus! We should have 0 left over after unloading!
+        }
     }
 
 }

@@ -5,7 +5,11 @@ import architecture.training.market.inventorymanagement.domain.DomainEventPublis
 public class InventoryService {
     private final DomainEventPublisher publisher;
 
+    public InventoryService(DomainEventPublisher publisher) {
+        this.publisher = publisher;
+    }
+
     public Inventory countInventory(InventoryRequest request) {
-       return Inventory.create( request.itemCounts(),request.employeeId(), publisher);
+        return Inventory.create(request.itemCounts(), request.employeeId(), publisher);
     }
 }

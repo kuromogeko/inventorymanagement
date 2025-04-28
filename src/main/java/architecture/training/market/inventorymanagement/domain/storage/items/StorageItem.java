@@ -35,6 +35,10 @@ public class StorageItem {
 
     }
 
+    public UUID getItemId() {
+        return this.itemId;
+    }
+
     public boolean hasStorageType(UUID storageTypeId) {
         return this.allowedStorageTypes.stream().anyMatch(allowed -> allowed.getUuid().equals(storageTypeId));
     }

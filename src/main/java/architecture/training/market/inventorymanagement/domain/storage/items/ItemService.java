@@ -60,7 +60,7 @@ public class ItemService {
             if (capacity.getRemainingCapacity().greaterOrEquals(remainingAmount)) {
                 this.storeItem(new StorageRequest(request.storageItemId(), remainingAmount, request.bestBefore(),
                         capacity.getId()));
-                remainingAmount = new ItemAmount(0);
+                remainingAmount = ItemAmount.ZERO;
                 break;
             }
             var itemCapacityOfUnit = capacity.getRemainingCapacity();
@@ -94,10 +94,10 @@ public class ItemService {
     }
 
     private void handleInventoryItemDecrease(InventoryCount count, InventoryItem item) {
-        item.notifyUnexplainedStockDecrease(
+        item.unexplainedStockDecrease(
                 item.getStoredAmount().subtractSafe(count.countedAmount()), publisher);
         if(count.soonestBestBefore().isOlder(item.getBestBefore())){
-            item.notifySoonerBestBeforeFound(count.soonestBestBefore(), publisher);
+            item.soonerBestBeforeFound(count.soonestBestBefore(), publisher);
         }
     }
 
