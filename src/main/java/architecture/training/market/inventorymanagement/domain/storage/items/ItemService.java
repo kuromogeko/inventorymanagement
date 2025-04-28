@@ -1,6 +1,7 @@
 package architecture.training.market.inventorymanagement.domain.storage.items;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
 import architecture.training.market.inventorymanagement.domain.DomainLogger;
@@ -93,10 +94,19 @@ public class ItemService {
         });
     }
 
+    public void removeItem(UUID storageItemId, ItemAmount amount) {
+        var item = itemRepository.findById(storageItemId)
+                .orElseThrow(() -> new IllegalArgumentException("Storage item not found for ID: " + storageItemId));
+        if(!item.getStoredAmount().greaterOrEquals(amount)){
+            throw new IllegalArgumentException("Not enough stock to remove");
+        }
+        item.stockDecrease(amount, publisher);
+    }
+
     private void handleInventoryItemDecrease(InventoryCount count, InventoryItem item) {
-        item.unexplainedStockDecrease(
+        item.stockDecrease(
                 item.getStoredAmount().subtractSafe(count.countedAmount()), publisher);
-        if(count.soonestBestBefore().isOlder(item.getBestBefore())){
+        if (count.soonestBestBefore().isOlder(item.getBestBefore())) {
             item.soonerBestBeforeFound(count.soonestBestBefore(), publisher);
         }
     }

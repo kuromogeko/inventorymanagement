@@ -51,14 +51,19 @@ public class InventoryItem {
         this.amount = this.amount.add(event.amount());
     }
 
-    public void unexplainedStockDecrease(ItemAmount difference, DomainEventPublisher publisher) {
+    public void stockDecrease(ItemAmount difference, DomainEventPublisher publisher) {
         try {
-            this.amount = this.amount.subtract(difference);
-            publisher.publishEvent(new InventoryItemDecreasedEvent(this.storageItemId, difference));
+            InventoryItemDecreasedEvent event = new InventoryItemDecreasedEvent(this.storageItemId, difference);
+            applyStockDecrease(event);
+            publisher.publishEvent(event);
         } catch (CapacityBelowZeroException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    private void applyStockDecrease(InventoryItemDecreasedEvent event) throws CapacityBelowZeroException {
+        this.amount = this.amount.subtract(event.decreasedBy());
     }
 
     public void soonerBestBeforeFound(BestBefore soonestBestBefore, DomainEventPublisher publisher) {
