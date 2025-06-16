@@ -5,9 +5,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 import architecture.training.market.inventorymanagement.domain.storage.StorageType;
+import architecture.training.market.inventorymanagement.domain.storage.StorageTypeCreatedEvent;
 import architecture.training.market.inventorymanagement.domain.storage.StorageTypeUpdateRequest;
+import architecture.training.market.inventorymanagement.domain.storage.StorageTypeUpdatedEvent;
 import architecture.training.market.inventorymanagement.domain.storage.StorageTypeUseCase;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
 
+@Service
 public class StorageTypeService implements StorageTypeUseCase {
 
     private final DomainEventPublisher publisher;
@@ -46,5 +51,17 @@ public class StorageTypeService implements StorageTypeUseCase {
     public StorageType createStorageType(String name, String description) {
         return StorageType.create(name, description, this.publisher);
     }
+
+
+    @EventListener
+    public void handleTypeCreated(StorageTypeCreatedEvent event){
+        repository.save(event);
+    }
+
+    @EventListener
+    public void handleTypeUpdated(StorageTypeUpdatedEvent event){
+        repository.save(event);
+    }
+
 
 }

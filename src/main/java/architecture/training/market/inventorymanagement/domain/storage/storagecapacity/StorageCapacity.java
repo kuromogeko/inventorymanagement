@@ -1,16 +1,15 @@
 package architecture.training.market.inventorymanagement.domain.storage.storagecapacity;
 
+import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
+import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemStoredEvent;
+import architecture.training.market.inventorymanagement.domain.storage.items.StorageItem;
+
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
-import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemStoredEvent;
-import architecture.training.market.inventorymanagement.domain.storage.items.StorageItem;
-
 /**
- *
  * @author Admin
  */
 public class StorageCapacity {
@@ -27,7 +26,7 @@ public class StorageCapacity {
     }
 
     protected static StorageCapacity create(String name, UUID storageTypeId, ItemAmount maxCapacity,
-            DomainEventPublisher publisher) {
+                                            DomainEventPublisher publisher) {
         var ev = new StorageCapacityCreatedEvent(UUID.randomUUID(), name, storageTypeId, maxCapacity);
         var cap = applyCreate(ev);
         publisher.publishEvent(ev);
@@ -36,7 +35,7 @@ public class StorageCapacity {
 
     public static StorageCapacity applyCreate(StorageCapacityCreatedEvent ev) {
         if (ev.id() == null || ev.name() == null || ev.name().isEmpty() || ev.storageTypeId() == null
-                || ev.maxCapacity() == null) {
+            || ev.maxCapacity() == null) {
             throw new IllegalArgumentException("Arguments cannot be null or empty");
         }
         var cap = new StorageCapacity();
@@ -49,7 +48,6 @@ public class StorageCapacity {
     }
 
     /**
-     * 
      * @return true if no items are in this capacity
      */
     public boolean isUnloaded() {
@@ -125,4 +123,6 @@ public class StorageCapacity {
             }
         });
     }
+
+
 }

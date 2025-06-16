@@ -5,5 +5,6 @@ import java.util.UUID;
 
 public interface StorageItemRepository {
     Optional<StorageItem> findById(UUID id);
-    
+
+    void save(StorageItemCreatedEvent event);
 }

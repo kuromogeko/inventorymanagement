@@ -11,7 +11,11 @@ import architecture.training.market.inventorymanagement.domain.DomainEventPublis
 import architecture.training.market.inventorymanagement.domain.StorageTypeService;
 import architecture.training.market.inventorymanagement.domain.storage.StorageType;
 import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemDecreasedEvent;
+import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemStoredEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
 
+@Service
 public class StorageCapacityService {
     private final StorageTypeService typeService;
     private final StorageCapacityRepository repository;
@@ -56,7 +60,7 @@ public class StorageCapacityService {
         var allsCapacitiesWithMatchingType = repository.findAll().stream()
                 .filter(capacity -> storageTypes.stream()
                         .anyMatch(wants -> wants.getUuid().equals(capacity.getStorageTypeId())))
-                .collect(Collectors.toList());
+                .toList();
         var reservedStorage = ItemAmount.ZERO;
         List<StorageCapacity> neededStorage = new ArrayList<>();
         for (StorageCapacity storageCapacity : allsCapacitiesWithMatchingType) {
@@ -72,9 +76,10 @@ public class StorageCapacityService {
         return Collections.unmodifiableList(neededStorage);
     }
 
+    @EventListener
     public void unloadCapacity(InventoryItemDecreasedEvent event) {
         List<StorageCapacity> capacitiesWithItem = repository.findAll().stream()
-                .filter(capacity -> capacity.hasItem(event.storageItemId())).collect(Collectors.toList());
+                .filter(capacity -> capacity.hasItem(event.storageItemId())).toList();
         var remainingUnloadAmount = event.decreasedBy();
         for (StorageCapacity currentCapacity : capacitiesWithItem) {
             var item = currentCapacity.getItem(event.storageItemId());
@@ -93,6 +98,21 @@ public class StorageCapacityService {
         if (remainingUnloadAmount.greaterOrEquals(ItemAmount.ZERO)) {
             // TODO LOG this is sus! We should have 0 left over after unloading!
         }
+    }
+
+    @EventListener
+    public void handleItemStore(InventoryItemStoredEvent event){
+        repository.save(event);
+    }
+
+    @EventListener
+    public void handleStorageCapacityCreation(StorageCapacityCreatedEvent event){
+        repository.save(event);
+    }
+
+    @EventListener
+    public void handleItemUnloadEvent(ItemUnloadedEvent event){
+        repository.save(event);
     }
 
 }

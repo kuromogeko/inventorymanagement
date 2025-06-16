@@ -34,6 +34,11 @@ public class StorageType {
         return storageType;
     }
 
+    public void applyUpdate(StorageTypeUpdatedEvent event){
+        this.description = event.description();
+        this.name = event.name();
+    }
+
     public UUID getUuid() {
         return uuid;
     }

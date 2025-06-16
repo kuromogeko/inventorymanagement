@@ -1,10 +1,11 @@
 package architecture.training.market.inventorymanagement.domain.storage.items;
 
-import java.util.List;
-import java.util.UUID;
-
 import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
 import architecture.training.market.inventorymanagement.domain.storage.StorageType;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
+import java.util.UUID;
 
 public class StorageItem {
     private List<StorageType> allowedStorageTypes;
@@ -14,7 +15,7 @@ public class StorageItem {
     }
 
     public static StorageItem create(UUID itemId, List<StorageType> allowedStorageTypes,
-            DomainEventPublisher publisher) {
+                                     DomainEventPublisher publisher) {
         var ev = new StorageItemCreatedEvent(itemId, allowedStorageTypes);
         var si = applyCreate(ev);
         publisher.publishEvent(ev);
@@ -22,7 +23,7 @@ public class StorageItem {
     }
 
     public static StorageItem applyCreate(StorageItemCreatedEvent ev) {
-        if (ev.allowedStorageTypes() == null || ev.allowedStorageTypes().contains(null)) {
+        if (CollectionUtils.isEmpty(ev.allowedStorageTypes()) || CollectionUtils.containsInstance(ev.allowedStorageTypes(), null)) {
             throw new IllegalArgumentException("Allowed storage types cannot be null or contain null values");
         }
         if (ev.itemId() == null) {

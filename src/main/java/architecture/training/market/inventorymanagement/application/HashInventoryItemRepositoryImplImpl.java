@@ -1,10 +1,5 @@
 package architecture.training.market.inventorymanagement.application;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Optional;
-import java.util.UUID;
-
 import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItem;
 import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemBestBeforeChanged;
 import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemDecreasedEvent;
@@ -12,7 +7,14 @@ import architecture.training.market.inventorymanagement.domain.storage.items.Inv
 import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemRepository;
 import architecture.training.market.inventorymanagement.domain.storage.items.InventoryItemStoredEvent;
 import architecture.training.market.inventorymanagement.domain.storage.storagecapacity.CapacityBelowZeroException;
+import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Optional;
+import java.util.UUID;
+
+@Component
 public class HashInventoryItemRepositoryImplImpl implements InventoryItemRepository {
 
     private final HashMap<UUID, ItemHistory> repo;
@@ -41,6 +43,22 @@ public class HashInventoryItemRepositoryImplImpl implements InventoryItemReposit
             }
             return start;
         });
+    }
+
+    @Override
+    public void saveEvent(InventoryItemBestBeforeChanged event) {
+        Optional.ofNullable(repo.get(event.storageItemId())).ifPresent(itemHistory -> itemHistory.events.add(event));
+    }
+
+    @Override
+    public void saveEvent(InventoryItemStoredEvent event) {
+        Optional.ofNullable(repo.get(event.storageItemId())).ifPresentOrElse(itemHistory -> itemHistory.events.add(event),
+                () -> repo.put(event.storageItemId(), new ItemHistory(event, new ArrayList<>())));
+    }
+
+    @Override
+    public void saveEvent(InventoryItemDecreasedEvent event) {
+        Optional.ofNullable(repo.get(event.storageItemId())).ifPresent(itemHistory -> itemHistory.events.add(event));
     }
 
     private record ItemHistory(InventoryItemStoredEvent fuse, ArrayList<InventoryItemEvent> events) {

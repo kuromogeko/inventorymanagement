@@ -5,4 +5,6 @@ import java.util.UUID;
 
 public interface InventoryRepository {
     Optional<Inventory> findById(UUID id);
+
+    void saveEvent(InventoryCountedEvent event);
 }

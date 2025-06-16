@@ -1,8 +1,5 @@
 package architecture.training.market.inventorymanagement.domain.storage.items;
 
-import java.util.Optional;
-import java.util.UUID;
-
 import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
 import architecture.training.market.inventorymanagement.domain.DomainLogger;
 import architecture.training.market.inventorymanagement.domain.storage.inventory.InventoryCount;
@@ -12,7 +9,13 @@ import architecture.training.market.inventorymanagement.domain.storage.storageca
 import architecture.training.market.inventorymanagement.domain.storage.storagecapacity.SimpleStorageRequest;
 import architecture.training.market.inventorymanagement.domain.storage.storagecapacity.StorageCapacityService;
 import architecture.training.market.inventorymanagement.domain.storage.storagecapacity.StorageRequest;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
 public class ItemService {
     private final StorageCapacityService storageCapacityService;
     private final StorageItemRepository storageItemInformationRepository;
@@ -21,7 +24,7 @@ public class ItemService {
     private final InventoryItemRepository itemRepository;
 
     public ItemService(StorageCapacityService storageCapacityService, StorageItemRepository storageItemRepository,
-            DomainEventPublisher publisher, InventoryItemRepository itemRepository, DomainLogger logger) {
+                       DomainEventPublisher publisher, InventoryItemRepository itemRepository, DomainLogger logger) {
         this.storageCapacityService = storageCapacityService;
         this.storageItemInformationRepository = storageItemRepository;
         this.publisher = publisher;
@@ -71,6 +74,7 @@ public class ItemService {
         }
     }
 
+    @EventListener
     public void handleInventoryCountedEvent(InventoryCountedEvent event) {
         event.itemCounts().stream().forEach(count -> {
             var item = itemRepository.findById(count.storageItemId());
@@ -97,7 +101,7 @@ public class ItemService {
     public void removeItem(UUID storageItemId, ItemAmount amount) {
         var item = itemRepository.findById(storageItemId)
                 .orElseThrow(() -> new IllegalArgumentException("Storage item not found for ID: " + storageItemId));
-        if(!item.getStoredAmount().greaterOrEquals(amount)){
+        if (!item.getStoredAmount().greaterOrEquals(amount)) {
             throw new IllegalArgumentException("Not enough stock to remove");
         }
         item.stockDecrease(amount, publisher);
@@ -121,5 +125,20 @@ public class ItemService {
             // sense however....
             logger.log("Counted Item (count was higher than store) has no capacity to be stored");
         }
+    }
+
+    @EventListener
+    public void handleItemBestBeforeChange(InventoryItemBestBeforeChanged event){
+        itemRepository.saveEvent(event);
+    }
+
+    @EventListener
+    public void handleInventoryItemStoredEvent(InventoryItemStoredEvent event){
+        itemRepository.saveEvent(event);
+    }
+
+    @EventListener
+    public void handleItemDecreaseEvent(InventoryItemDecreasedEvent event){
+        itemRepository.saveEvent(event);
     }
 }

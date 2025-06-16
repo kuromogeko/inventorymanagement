@@ -1,7 +1,10 @@
 package architecture.training.market.inventorymanagement.domain.sales;
 
 import architecture.training.market.inventorymanagement.domain.storage.items.ItemService;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
 
+@Service
 public class SalesService {
     private final ItemService itemService;
 
@@ -9,7 +12,8 @@ public class SalesService {
         this.itemService = itemService;
     }
 
-    public void handleItemSolt(ItemSoldEvent event) {
+    @EventListener
+    public void handleItemSold(ItemSoldEvent event) {
         itemService.removeItem(event.itemId(), event.amount());
     }
 }

@@ -1,9 +1,11 @@
 package architecture.training.market.inventorymanagement.domain.storage.inventory;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
+import org.springframework.context.event.EventListener;
 
 public class Inventory {
     private UUID id;
@@ -23,7 +25,7 @@ public class Inventory {
 
     public static Inventory applyCreate(InventoryCountedEvent ev) {
         if (ev.id() == null || ev.employeeId() == null || ev.itemCounts() == null
-                || ev.itemCounts().stream().anyMatch(item -> item == null)) {
+                || ev.itemCounts().stream().anyMatch(Objects::isNull)) {
             throw new IllegalArgumentException(
                     "Event must have non-null id, employeeId and itemCounts with no null elements.");
         }
