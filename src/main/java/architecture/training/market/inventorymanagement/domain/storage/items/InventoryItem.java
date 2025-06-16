@@ -62,11 +62,17 @@ public class InventoryItem {
         }
     }
 
-    private void applyStockDecrease(InventoryItemDecreasedEvent event) throws CapacityBelowZeroException {
+    public void applyStockDecrease(InventoryItemDecreasedEvent event) throws CapacityBelowZeroException {
         this.amount = this.amount.subtract(event.decreasedBy());
     }
 
     public void soonerBestBeforeFound(BestBefore soonestBestBefore, DomainEventPublisher publisher) {
-        publisher.publishEvent(new InventoryItemBestBeforeChanged(this.storageItemId, soonestBestBefore));
+        var event = new InventoryItemBestBeforeChanged(this.storageItemId, soonestBestBefore);
+        this.applySoonerBestBefore(event);
+        publisher.publishEvent(event);
+    }
+
+    public void applySoonerBestBefore(InventoryItemBestBeforeChanged event) {
+        this.bestBefore = this.bestBefore.older(event.bestBefore());
     }
 }

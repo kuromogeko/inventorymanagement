@@ -111,7 +111,7 @@ public class StorageCapacity {
         publisher.publishEvent(event);
     }
 
-    private void applyUnload(ItemUnloadedEvent event) {
+    public void applyUnload(ItemUnloadedEvent event) {
         this.remainingCapacity.add(event.amount());
         if (this.remainingCapacity.greaterThan(this.maxCapacity)) {
             this.remainingCapacity = this.maxCapacity;

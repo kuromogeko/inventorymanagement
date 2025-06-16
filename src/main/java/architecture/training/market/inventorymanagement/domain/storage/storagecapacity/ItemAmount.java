@@ -2,7 +2,7 @@ package architecture.training.market.inventorymanagement.domain.storage.storagec
 
 public record ItemAmount(int capacity)  {
 
-    public static final ItemAmount ZERO = ItemAmount.ZERO;
+    public static final ItemAmount ZERO = new ItemAmount(0);
 
     public ItemAmount {
         if (capacity < 0) {
