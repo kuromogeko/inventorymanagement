@@ -8,4 +8,11 @@ import architecture.training.market.inventorymanagement.domain.storage.StorageTy
 
 public record StorageItemCreatedEvent(UUID itemId, List<StorageType> allowedStorageTypes) implements DomainEvent {
 
+    @Override
+    public String toString() {
+        return "StorageItemCreatedEvent{" +
+               "itemId=" + itemId +
+               ", allowedStorageTypes=" + allowedStorageTypes +
+               '}';
+    }
 }

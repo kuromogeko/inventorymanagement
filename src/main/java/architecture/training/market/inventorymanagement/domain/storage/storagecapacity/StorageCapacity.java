@@ -110,7 +110,7 @@ public class StorageCapacity {
     }
 
     public void applyUnload(ItemUnloadedEvent event) {
-        this.remainingCapacity.add(event.amount());
+        this.remainingCapacity = this.remainingCapacity.add(event.amount());
         if (this.remainingCapacity.greaterThan(this.maxCapacity)) {
             this.remainingCapacity = this.maxCapacity;
             // TODO LOG THIS AS A WARN

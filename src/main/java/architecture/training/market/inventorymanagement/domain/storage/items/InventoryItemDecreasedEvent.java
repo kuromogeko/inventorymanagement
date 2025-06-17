@@ -6,5 +6,12 @@ import architecture.training.market.inventorymanagement.domain.DomainEvent;
 import architecture.training.market.inventorymanagement.domain.storage.storagecapacity.ItemAmount;
 
 public record InventoryItemDecreasedEvent(UUID storageItemId,  ItemAmount decreasedBy) implements DomainEvent, InventoryItemEvent {
-    
+
+    @Override
+    public String toString() {
+        return "InventoryItemDecreasedEvent{" +
+               "storageItemId=" + storageItemId +
+               ", decreasedBy=" + decreasedBy +
+               '}';
+    }
 }

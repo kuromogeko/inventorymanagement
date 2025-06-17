@@ -1,17 +1,19 @@
 package architecture.training.market.inventorymanagement.domain.storage;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class StorageTypeTest {
@@ -21,40 +23,32 @@ public class StorageTypeTest {
 
     @Test
     public void testConstructorWithNullName() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            StorageType.create(null, "Description", domainEventPublisher);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> StorageType.create(null, "Description", domainEventPublisher));
         assertEquals("Name cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testConstructorWithEmptyName() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            StorageType.create("", "Description", domainEventPublisher);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> StorageType.create("", "Description", domainEventPublisher));
         assertEquals("Name cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testConstructorWithNullDescription() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            StorageType.create("Name", null, domainEventPublisher);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> StorageType.create("Name", null, domainEventPublisher));
         assertEquals("Description cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testConstructorWithEmptyDescription() {
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            StorageType.create("Name", "", domainEventPublisher);
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> StorageType.create("Name", "", domainEventPublisher));
         assertEquals("Description cannot be null or empty", exception.getMessage());
     }
 
     @Test
     public void testConstructorHappyPath() {
         StorageType storageType = StorageType.create("Name", "Description", domainEventPublisher);
-        assertEquals(true, storageType.getUuid() != null && !storageType.getUuid().toString().isEmpty());
+        assertTrue(storageType.getUuid() != null && !storageType.getUuid().toString().isEmpty());
         ArgumentCaptor<StorageTypeCreatedEvent> captor = ArgumentCaptor.forClass(StorageTypeCreatedEvent.class);
         verify(domainEventPublisher, times(1)).publishEvent(captor.capture());
         var cap = captor.getValue();
@@ -63,4 +57,21 @@ public class StorageTypeTest {
         assertNotNull(cap.uuid());
     }
 
+    @Test
+    void updatesShouldBeApplied() {
+        StorageType storageType = StorageType.create("Name", "Description", domainEventPublisher);
+        storageType.update(new StorageTypeUpdateRequest("New Name", "New Desc"), domainEventPublisher);
+        ArgumentCaptor<StorageTypeUpdatedEvent> updateCaptor = ArgumentCaptor.forClass(StorageTypeUpdatedEvent.class);
+        verify(domainEventPublisher, times(1)).publishEvent(updateCaptor.capture());
+        storageType.applyUpdate(updateCaptor.getValue());
+        assertEquals("New Name", storageType.getName());
+        assertEquals("New Desc", storageType.getDescription());
+    }
+
+    @Test
+    void equalsShouldUseIdentity() {
+        StorageType storageType = StorageType.create("Name", "Description", domainEventPublisher);
+        StorageType storageTypeTwo = StorageType.create("Name", "Description", domainEventPublisher);
+        assertNotEquals(storageType, storageTypeTwo);
+    }
 }

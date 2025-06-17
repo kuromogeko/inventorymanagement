@@ -1,12 +1,5 @@
 package architecture.training.market.inventorymanagement.domain.storage.storagecapacity;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import architecture.training.market.inventorymanagement.domain.DomainEventPublisher;
 import architecture.training.market.inventorymanagement.domain.StorageTypeService;
 import architecture.training.market.inventorymanagement.domain.storage.StorageType;
@@ -15,6 +8,12 @@ import architecture.training.market.inventorymanagement.domain.storage.items.Inv
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 public class StorageCapacityService {
     private final StorageTypeService typeService;
@@ -22,7 +21,7 @@ public class StorageCapacityService {
     private final DomainEventPublisher publisher;
 
     public StorageCapacityService(StorageTypeService typeService, StorageCapacityRepository repository,
-            DomainEventPublisher publisher) {
+                                  DomainEventPublisher publisher) {
         this.typeService = typeService;
         this.repository = repository;
         this.publisher = publisher;
@@ -41,7 +40,7 @@ public class StorageCapacityService {
         if (capacity.isEmpty()) {
             throw new IllegalArgumentException("Can't delete non-existing capacity");
         }
-        if (capacity.get().isUnloaded()) {
+        if (!capacity.get().isUnloaded()) {
             throw new IllegalArgumentException("Cannot delete a Storage Capacity that has items in it.");
         }
         repository.deleteById(id);
@@ -101,17 +100,17 @@ public class StorageCapacityService {
     }
 
     @EventListener
-    public void handleItemStore(InventoryItemStoredEvent event){
+    public void handleItemStore(InventoryItemStoredEvent event) {
         repository.save(event);
     }
 
     @EventListener
-    public void handleStorageCapacityCreation(StorageCapacityCreatedEvent event){
+    public void handleStorageCapacityCreation(StorageCapacityCreatedEvent event) {
         repository.save(event);
     }
 
     @EventListener
-    public void handleItemUnloadEvent(ItemUnloadedEvent event){
+    public void handleItemUnloadEvent(ItemUnloadedEvent event) {
         repository.save(event);
     }
 
