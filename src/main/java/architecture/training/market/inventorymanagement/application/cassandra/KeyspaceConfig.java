@@ -1,6 +1,7 @@
 package architecture.training.market.inventorymanagement.application.cassandra;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.cassandra.config.AbstractCassandraConfiguration;
 import org.springframework.data.cassandra.config.SchemaAction;
@@ -14,14 +15,25 @@ import java.util.List;
 @Configuration
 public class KeyspaceConfig extends AbstractCassandraConfiguration implements BeanClassLoaderAware {
 
+    private final String contactPoint;
+    private final Integer port;
+
+
+    public KeyspaceConfig(@Value("${cassandra.contact-point}") String contactPoint,
+                          @Value("${cassandra.port}") Integer port) {
+        this.contactPoint = contactPoint;
+        this.port = port;
+    }
+
+
     @Override
     protected String getContactPoints() {
-        return "localhost";
+        return this.contactPoint;
     }
 
     @Override
     protected int getPort() {
-        return 9042;
+        return this.port;
     }
 
     @Override
